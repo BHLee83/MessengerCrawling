@@ -17,6 +17,9 @@ TOKEN = Config.TOKEN
 # 대화방 ID 설정
 ALLOWED_CHAT_ID = Config.chatID
 
+# 최대 메시지 길이 제한
+MAX_LENGTH = Config.MAX_LENGTH
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """채팅 시작 시 호출됩니다."""
@@ -33,10 +36,18 @@ async def proc(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         if text.startswith('/'):
             text = text.removeprefix('/').strip()
             ret = crawler.search(text)  # 메신저 내용 가져오기
-            if len(ret) == 0:
+            if ret.empty:
                 await update.message.reply_text(f'{text}이(가) 포함된 내용이 없습니다')
             else:
-                await update.message.reply_text(f'{"".join(ret)}')
+                msg = "\n".join(ret['Original'])
+                # 메시지 길이가 최대 길이를 초과하는지 확인
+                if len(msg) > MAX_LENGTH:
+                    # 메시지를 허용된 길이만큼 잘라서 보냄
+                    message_to_send = msg[-MAX_LENGTH:]
+                else:
+                    # 메시지 길이가 허용 범위 내이면 그대로 전송
+                    message_to_send = msg
+                await update.message.reply_text(f'{message_to_send}')
             
 
 
