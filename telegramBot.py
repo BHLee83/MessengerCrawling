@@ -1,11 +1,13 @@
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 from config import Config
+
+import os
 import logging
+import crawler
 import nest_asyncio
 nest_asyncio.apply()
 
-import crawler
 
 
 # 로깅 설정
@@ -19,6 +21,11 @@ ALLOWED_CHAT_ID = Config.chatID
 
 # 최대 메시지 길이 제한
 MAX_LENGTH = Config.MAX_LENGTH
+
+# 프록시 설정
+if Config.USE_PROXY:
+    os.environ['HTTP_PROXY'] = Config.HTTP_PROXY
+    os.environ['HTTPS_PROXY'] = Config.HTTPS_PROXY
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -55,7 +62,7 @@ def main() -> None:
     """봇을 생성하고 명령을 처리하는 메인 함수입니다."""
     # 애플리케이션 인스턴스 생성
     application = Application.builder().token(TOKEN).build()
-
+    
     # 시작 명령 처리 핸들러
     application.add_handler(CommandHandler("start", start))
 
